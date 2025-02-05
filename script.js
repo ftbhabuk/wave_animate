@@ -126,11 +126,14 @@ class Wave {
         this.x = x;
         this.y = y;
         this.radius = 0;
-        this.strength = strength * config.waveStrength;
-        this.speed = config.waveSpeed;
+        this.strength = strength;
+        this.speed = 5;
         this.energy = 1;
         this.width = 2;
         this.collisions = new Set();
+        
+        // Simple random color generation
+        this.hue = Math.floor(Math.random() * 360);
     }
 
     distanceTo(other) {
@@ -169,11 +172,11 @@ class Wave {
             this.x, this.y, this.radius + this.width
         );
 
-        gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
-        gradient.addColorStop(0.3, `rgba(255, 255, 255, ${intensity * 0.3})`);
-        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${intensity})`);
-        gradient.addColorStop(0.7, `rgba(255, 255, 255, ${intensity * 0.3})`);
-        gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+        gradient.addColorStop(0, `hsla(${this.hue}, 80%, 60%, 0)`);
+        gradient.addColorStop(0.3, `hsla(${this.hue}, 80%, 60%, ${intensity * 0.3})`);
+        gradient.addColorStop(0.5, `hsla(${this.hue}, 80%, 60%, ${intensity})`);
+        gradient.addColorStop(0.7, `hsla(${this.hue}, 80%, 60%, ${intensity * 0.3})`);
+        gradient.addColorStop(1, `hsla(${this.hue}, 80%, 60%, 0)`);
 
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
