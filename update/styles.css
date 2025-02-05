@@ -129,3 +129,22 @@ select {
 #resetButton:hover {
     background: #5a5a5a;
 }
+/* Add these styles for the auto-click button */
+.auto-click-btn {
+    width: 100%;
+    padding: 10px;
+    background: #4a4a4a;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.auto-click-btn:hover {
+    background: #5a5a5a;
+}
+
+.auto-click-btn.active {
+    background: #6a6a6a;
+}

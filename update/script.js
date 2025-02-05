@@ -284,3 +284,36 @@ document.getElementById('backgroundFade').addEventListener('input', (e) => {
 });
 
 animate();
+// Add to the existing script
+
+let autoClickInterval = null;
+
+function getRandomPosition() {
+    return {
+        x: Math.random() * canvas.getBoundingClientRect().width,
+        y: Math.random() * canvas.getBoundingClientRect().height
+    };
+}
+
+function toggleAutoClick() {
+    const autoClickButton = document.getElementById('autoClickButton');
+    
+    if (autoClickInterval) {
+        // Stop auto-clicking
+        clearInterval(autoClickInterval);
+        autoClickInterval = null;
+        autoClickButton.textContent = 'Start Auto-Click';
+        autoClickButton.classList.remove('active');
+    } else {
+        // Start auto-clicking
+        autoClickInterval = setInterval(() => {
+            const { x, y } = getRandomPosition();
+            handleClick(x, y);
+        }, 500); // Click every 500 milliseconds
+        autoClickButton.textContent = 'Stop Auto-Click';
+        autoClickButton.classList.add('active');
+    }
+}
+
+// Add event listener for the auto-click button
+document.getElementById('autoClickButton').addEventListener('click', toggleAutoClick);
