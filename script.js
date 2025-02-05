@@ -9,7 +9,8 @@ const config = {
     backgroundFade: 0.1,
     colorPalette: 'white',
     trailEffect: false,
-    gravityIntensity: 1
+    gravityIntensity: 1,
+    colorMode: 'monochrome' // Default to monochrome
 };
 
 function resize() {
@@ -132,8 +133,11 @@ class Wave {
         this.width = 2;
         this.collisions = new Set();
         
-        // Simple random color generation
-        this.hue = Math.floor(Math.random() * 360);
+        // Pure white color
+        this.baseColor = [255, 255, 255];
+        this.currentColor = [...this.baseColor];
+        this.hasInteracted = false;
+        this.colorMode = config.colorMode; // Use global color mode
     }
 
     distanceTo(other) {
@@ -141,6 +145,8 @@ class Wave {
     }
 
     interact(other) {
+        if (this === other) return;
+        
         if (this.collisions.has(other.id)) return;
         
         const distance = this.distanceTo(other);
@@ -150,10 +156,14 @@ class Wave {
             this.collisions.add(other.id);
             other.collisions.add(this.id);
 
-            if (this.strength > other.strength) {
-                this.energy *= 0.9;
-                this.speed *= 0.95;
-                this.strength = Math.max(this.strength * 0.95, other.strength);
+            // Change color only if color mode is colorful
+            if (!this.hasInteracted && this.colorMode === 'colorful') {
+                this.currentColor = [
+                    Math.floor(Math.random() * 256),
+                    Math.floor(Math.random() * 256),
+                    Math.floor(Math.random() * 256)
+                ];
+                this.hasInteracted = true;
             }
         }
     }
@@ -167,16 +177,18 @@ class Wave {
 
     draw(ctx) {
         const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+        
         const gradient = ctx.createRadialGradient(
             this.x, this.y, this.radius - this.width,
             this.x, this.y, this.radius + this.width
         );
 
-        gradient.addColorStop(0, `hsla(${this.hue}, 80%, 60%, 0)`);
-        gradient.addColorStop(0.3, `hsla(${this.hue}, 80%, 60%, ${intensity * 0.3})`);
-        gradient.addColorStop(0.5, `hsla(${this.hue}, 80%, 60%, ${intensity})`);
-        gradient.addColorStop(0.7, `hsla(${this.hue}, 80%, 60%, ${intensity * 0.3})`);
-        gradient.addColorStop(1, `hsla(${this.hue}, 80%, 60%, 0)`);
+        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
+        gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${intensity * 0.3})`);
+        gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${intensity})`);
+        gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, ${intensity * 0.3})`);
+        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
 
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -317,6 +329,15 @@ function toggleAutoClick() {
         autoClickButton.classList.add('active');
     }
 }
+// Add event listener for color mode toggle
+function toggleColorMode() {
+    config.colorMode = config.colorMode === 'monochrome' ? 'colorful' : 'monochrome';
+    const colorModeButton = document.getElementById('colorModeButton');
+    colorModeButton.textContent = `Color Mode: ${config.colorMode}`;
+    colorModeButton.classList.toggle('colorful', config.colorMode === 'colorful');
+}
 
 // Add event listener for the auto-click button
 document.getElementById('autoClickButton').addEventListener('click', toggleAutoClick);
+// Add this to the existing script
+document.getElementById('colorModeButton').addEventListener('click', toggleColorMode);
