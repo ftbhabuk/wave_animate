@@ -1,225 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #000;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
+    <title>Wave Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <canvas id="waveCanvas"></canvas>
-    <script>
-        const canvas = document.getElementById('waveCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resize() {
-            const scale = window.devicePixelRatio || 1;
-            canvas.width = window.innerWidth * scale;
-            canvas.height = window.innerHeight * scale;
-            canvas.style.width = window.innerWidth + 'px';
-            canvas.style.height = window.innerHeight + 'px';
-            ctx.scale(scale, scale);
-        }
-        
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Droplet {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.startX = x;
-                this.startY = y;
-                // Mostly vertical movement with tiny random horizontal variance
-                this.velocityX = (Math.random() - 0.5) * 1; // Very small horizontal movement
-                this.velocityY = -15 - Math.random() * 1; // Strong upward movement
-                this.gravity = 0.8;
-                this.size = Math.random() * 2 + 1;
-                this.alpha = 1;
-                this.landed = false;
-            }
-
-            update() {
-                if (!this.landed) {
-                    // Add slight drift back toward starting point
-                    if (this.x !== this.startX) {
-                        this.velocityX += (this.startX - this.x) * 0.02;
-                    }
-                    
-                    this.x += this.velocityX * 0.2; // Reduced horizontal movement
-                    this.y += this.velocityY;
-                    this.velocityY += this.gravity;
-
-                    // Check if droplet has landed near starting point
-                    if (this.velocityY > 0 && this.y > this.startY) {
-                        this.landed = true;
-                        // Create small ripple where droplet lands
-                        addWave(this.x, this.y, 0.22);
-                        return true;
-                    }
-                } else {
-                    this.alpha -= 0.1;
-                }
-                return this.alpha > 0;
-            }
-
-            draw(ctx) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-                ctx.fill();
-            }
-        }
-
-        class Wave {
-            constructor(x, y, strength = 1) {
-                this.x = x;
-                this.y = y;
-                this.radius = 0;
-                this.strength = strength;
-                this.speed = 5;
-                this.energy = 1;
-                this.width = 2;
-                this.collisions = new Set();
-            }
-
-            distanceTo(other) {
-                return Math.hypot(this.x - other.x, this.y - other.y);
-            }
-
-            interact(other) {
-                if (this.collisions.has(other.id)) return;
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-toggle">
+               
+            </div>
+            <div class="sidebar-content">
+                <h2>Wave Simulation</h2>
                 
-                const distance = this.distanceTo(other);
-                const radiusSum = this.radius + other.radius;
+                <div class="control-section">
+                    <div class="section-header" data-section="droplets">
+                        <h3>Droplets <i class="fas fa-chevron-down"></i></h3>
+                    </div>
+                    <div class="section-content">
+                        <label>
+                            Number of Droplets
+                            <input type="range" id="dropletCount" min="0" max="50" value="20">
+                            <span id="dropletCountValue">20</span>
+                        </label>
+                        <label>
+                            Droplet Velocity
+                            <input type="range" id="dropletVelocity" min="10" max="30" value="15" step="0.5">
+                            <span id="dropletVelocityValue">15</span>
+                        </label>
+                    </div>
+                </div>
 
-                if (Math.abs(distance - radiusSum) < this.width * 2) {
-                    this.collisions.add(other.id);
-                    other.collisions.add(this.id);
+                <div class="control-section">
+                    <div class="section-header" data-section="waves">
+                        <h3>Waves <i class="fas fa-chevron-down"></i></h3>
+                    </div>
+                    <div class="section-content">
+                        <label>
+                            Wave Speed
+                            <input type="range" id="waveSpeed" min="1" max="10" value="5" step="0.5">
+                            <span id="waveSpeedValue">5</span>
+                        </label>
+                        <label>
+                            Wave Strength
+                            <input type="range" id="waveStrength" min="0.1" max="2" value="1" step="0.1">
+                            <span id="waveStrengthValue">1</span>
+                        </label>
+                    </div>
+                </div>
 
-                    if (this.strength > other.strength) {
-                        this.energy *= 0.9;
-                        this.speed *= 0.95;
-                        this.strength = Math.max(this.strength * 0.95, other.strength);
-                    }
-                }
-            }
+                <div class="control-section">
+                    <div class="section-header" data-section="visual">
+                        <h3>Visual Effects <i class="fas fa-chevron-down"></i></h3>
+                    </div>
+                    <div class="section-content">
+                        <label>
+                            Background Fade
+                            <input type="range" id="backgroundFade" min="0.05" max="0.2" value="0.1" step="0.01">
+                            <span id="backgroundFadeValue">0.1</span>
+                        </label>
+                        <label>
+                            Color Palette
+                            <select id="colorPalette">
+                                <option value="white">White</option>
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="purple">Purple</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
 
-            update() {
-                this.radius += this.speed * this.energy;
-                this.energy *= 0.995;
-                this.strength *= 0.99;
-                return this.strength > 0.01 && this.energy > 0.01;
-            }
+                <div class="control-section">
+                    <div class="section-header" data-section="advanced">
+                        <h3>Advanced <i class="fas fa-chevron-down"></i></h3>
+                    </div>
+                    <div class="section-content">
+                        <label>
+                            <input type="checkbox" id="trailEffect"> Enable Trail Effect
+                        </label>
+                        <label>
+                            Gravity Intensity
+                            <input type="range" id="gravityIntensity" min="0.5" max="1.5" value="1" step="0.1">
+                            <span id="gravityIntensityValue">1</span>
+                        </label>
+                        <label>
+                            <button id="autoClickButton" class="auto-click-btn">Start Auto-Click</button>
+                        </label>
+                    </div>
+                </div>
 
-            draw(ctx) {
-                const intensity = this.strength * this.energy;
-                const gradient = ctx.createRadialGradient(
-                    this.x, this.y, this.radius - this.width,
-                    this.x, this.y, this.radius + this.width
-                );
-
-                gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
-                gradient.addColorStop(0.3, `rgba(255, 255, 255, ${intensity * 0.3})`);
-                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${intensity})`);
-                gradient.addColorStop(0.7, `rgba(255, 255, 255, ${intensity * 0.3})`);
-                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = this.width * 2;
-                ctx.stroke();
-            }
-        }
-
-        let waves = [];
-        let droplets = [];
-        let waveCounter = 0;
-
-        function addWave(x, y, strength = 1) {
-            const wave = new Wave(x, y, strength);
-            wave.id = waveCounter++;
-            waves.push(wave);
-        }
-
-        function createSplash(x, y) {
-            // Create main wave
-            addWave(x, y, 1);
-            
-            // Create droplets that mostly go straight up
-            const numDroplets = 20;
-            for (let i = 0; i < numDroplets; i++) {
-                droplets.push(new Droplet(x, y));
-            }
-
-            // Create small surrounding waves
-            for (let i = 0; i < 3; i++) {
-                const offset = 5; // Reduced offset for tighter grouping
-                const rx = x + (Math.random() - 0.5) * offset;
-                const ry = y + (Math.random() - 0.5) * offset;
-                addWave(rx, ry, 0.7 - i * 0.2);
-            }
-        }
-
-        function animate() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Update and draw droplets
-            droplets = droplets.filter(droplet => {
-                const isAlive = droplet.update();
-                if (isAlive) {
-                    droplet.draw(ctx);
-                }
-                return isAlive;
-            });
-
-            // Update wave interactions
-            for (let i = 0; i < waves.length; i++) {
-                for (let j = i + 1; j < waves.length; j++) {
-                    waves[i].interact(waves[j]);
-                }
-            }
-
-            // Update and draw waves
-            waves = waves.filter(wave => {
-                const isAlive = wave.update();
-                if (isAlive) {
-                    wave.draw(ctx);
-                }
-                return isAlive;
-            });
-
-            requestAnimationFrame(animate);
-        }
-
-        function handleClick(clientX, clientY) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const x = (clientX - rect.left) * scaleX;
-            const y = (clientY - rect.top) * scaleY;
-            createSplash(x, y);
-        }
-
-        canvas.addEventListener('click', (e) => {
-            handleClick(e.clientX, e.clientY);
-        });
-
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            handleClick(touch.clientX, touch.clientY);
-        }, { passive: false });
-
-        animate();
-    </script>
+                <div class="sidebar-footer">
+                    <button id="resetButton">Reset Simulation</button>
+                </div>
+            </div>
+        </div>
+        <canvas id="waveCanvas"></canvas>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
