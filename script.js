@@ -2,7 +2,7 @@ const canvas = document.getElementById('waveCanvas');
 const ctx = canvas.getContext('2d');
 
 const config = {
-    dropletCount: 20,
+    dropletCount: 0,
     dropletVelocity: 15,
     waveSpeed: 5,
     waveStrength: 1,
@@ -104,6 +104,504 @@ class Wave {
         this.currentColor = [...this.baseColor];
         this.hasInteracted = false;
         this.colorMode = config.colorMode; // Use global color mode
+        this.waveShape = config.waveShape; // Add this line to track current wave shape
+    }
+
+    // 
+    drawSophisticatedBacterialColony(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Performance and elegance optimization
+        const timeFlow = Date.now() * 0.0005;
+        const iterations = 3; // Reduced layers for performance
+
+        for (let iteration = 1; iteration <= iterations; iteration++) {
+            ctx.beginPath();
+
+            // More efficient and smoother growth pattern
+            const growthPoints = 80; // Reduced from previous version
+            for (let i = 0; i < growthPoints; i++) {
+                const angle = (i / growthPoints) * Math.PI * 2;
+                
+                // Elegant, smooth growth calculation
+                const radiusModulation = 
+                    Math.pow(Math.sin(angle * 4 + timeFlow), 3) * 0.1 +
+                    Math.cos(angle * 3 + timeFlow * iteration) * 0.05;
+
+                const dynamicRadius = baseRadius * (1 + 
+                    radiusModulation * (iteration / iterations)
+                );
+
+                const x = dynamicRadius * Math.cos(angle);
+                const y = dynamicRadius * Math.sin(angle);
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            // Refined visual styling
+            const layerAlpha = intensity * (1 - iteration/iterations) * 0.6;
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${layerAlpha})`;
+            ctx.lineWidth = this.width * (1 - iteration/iterations);
+            
+            // Subtle, elegant stroke
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.2)`;
+            ctx.globalCompositeOperation = 'lighter';
+            
+            ctx.stroke();
+        }
+
+        // Elegant cellular budding effect
+        this.drawElegantCellBuds(ctx, baseRadius, intensity, [r, g, b]);
+
+        ctx.restore();
+    }
+
+    drawElegantCellBuds(ctx, baseRadius, intensity, [r, g, b]) {
+        const timeFlow = Date.now() * 0.0008;
+        const budCount = 8; // Reduced for performance
+
+        ctx.beginPath();
+        for (let i = 0; i < budCount; i++) {
+            const angle = (i / budCount) * Math.PI * 2;
+            const budDistance = baseRadius * (1.2 + Math.sin(timeFlow + i * 0.5) * 0.1);
+            
+            const x = budDistance * Math.cos(angle);
+            const y = budDistance * Math.sin(angle);
+
+            // Softer, more organic bud representation
+            const budSize = baseRadius * 0.08 * (1 + Math.sin(timeFlow * 2 + i) * 0.2);
+            
+            ctx.moveTo(x + budSize, y);
+            ctx.arc(x, y, budSize, 0, Math.PI * 2);
+        }
+
+        const budIntensity = intensity * 0.4;
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${budIntensity})`;
+        ctx.fill();
+    }
+    // 
+    drawCosmicMandalaWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Multiple layers of intricate patterns
+        const layers = 5;
+        for (let layer = 1; layer <= layers; layer++) {
+            const layerRadius = baseRadius * (layer / layers);
+            const petalCount = 12 + layer * 3;
+            const rotationOffset = Math.sin(Date.now() * 0.001 * layer) * Math.PI;
+
+            ctx.save();
+            ctx.rotate(rotationOffset);
+
+            for (let i = 0; i < petalCount; i++) {
+                const angle = (i / petalCount) * Math.PI * 2;
+                
+                ctx.save();
+                ctx.rotate(angle);
+
+                // Complex petal with multiple curves
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(
+                    layerRadius / 3, -layerRadius * 0.6,
+                    layerRadius * 2/3, -layerRadius * 0.9,
+                    layerRadius, 0
+                );
+                ctx.bezierCurveTo(
+                    layerRadius * 2/3, layerRadius * 0.9,
+                    layerRadius / 3, layerRadius * 0.6,
+                    0, 0
+                );
+
+                // Varying opacity and line width for depth
+                const layerIntensity = intensity * (0.3 + 0.7 * (layers - layer) / layers);
+                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${layerIntensity})`;
+                ctx.lineWidth = this.width * (1 - layer/layers);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        ctx.restore();
+    }
+
+    // Fractal Dendrite Wave - Organic, branching neural-like network
+    drawFractalDendriteWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        const drawBranch = (x, y, length, angle, depth) => {
+            if (depth <= 0 || length < 1) return;
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            // Main branch
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(length, 0);
+
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity * (depth / 5)})`;
+            ctx.lineWidth = this.width * (depth / 5);
+            ctx.stroke();
+
+            // Recursive branching
+            const branchProbability = 0.7;
+            const branchAngleSpread = Math.PI / 4;
+            const lengthReduction = 0.7;
+
+            if (Math.random() < branchProbability) {
+                drawBranch(
+                    length, 0, 
+                    length * lengthReduction, 
+                    branchAngleSpread, 
+                    depth - 1
+                );
+                drawBranch(
+                    length, 0, 
+                    length * lengthReduction, 
+                    -branchAngleSpread, 
+                    depth - 1
+                );
+            }
+
+            ctx.restore();
+        };
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        drawBranch(0, 0, baseRadius, 0, 5);
+        ctx.restore();
+    }
+
+    // Quantum Interference Wave - Rippling, interference-like pattern
+    drawQuantumInterferenceWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        const waveCount = 5;
+        const timeOffset = Date.now() * 0.01;
+
+        for (let i = 0; i < waveCount; i++) {
+            const phaseShift = (i / waveCount) * Math.PI * 2;
+            const waveIntensity = intensity * (1 - i / waveCount);
+
+            ctx.beginPath();
+            for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) {
+                // Complex wave calculation with multiple sine functions
+                const radiusModulation = Math.sin(angle * 3 + timeOffset + phaseShift) * 
+                                         Math.cos(angle * 2 + timeOffset) * 
+                                         0.2 + 1;
+                const currentRadius = baseRadius * radiusModulation;
+
+                const x = currentRadius * Math.cos(angle);
+                const y = currentRadius * Math.sin(angle);
+
+                if (angle === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.closePath();
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${waveIntensity})`;
+            ctx.lineWidth = this.width * (1 - i / waveCount);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+    // 
+    drawFlowerWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        const petalCount = 5; // Reduced number of petals for more control
+        const baseAngle = Math.PI * 2 / petalCount;
+
+        for (let i = 0; i < petalCount; i++) {
+            ctx.save();
+            
+            // Rotate to create each petal
+            ctx.rotate(i * baseAngle);
+
+            // More controlled, symmetric petal shape
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            
+            // Create a more symmetric, controlled curve
+            ctx.bezierCurveTo(
+                baseRadius / 3, -baseRadius * 0.8, 
+                baseRadius * 2/3, -baseRadius * 0.8, 
+                baseRadius, 0
+            );
+            ctx.bezierCurveTo(
+                baseRadius * 2/3, baseRadius * 0.8, 
+                baseRadius / 3, baseRadius * 0.8, 
+                0, 0
+            );
+
+            // Vary opacity slightly between petals
+            const petalIntensity = intensity * (0.7 + Math.sin(i) * 0.3);
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${petalIntensity})`;
+            ctx.lineWidth = this.width;
+            
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        ctx.restore();
+    }
+    // 
+      // Ethereal Plasma Dynamics Wave
+      drawEtherealPlasmaWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Reduced layers and simplified calculation
+        const layers = 4; // Reduced from 7
+        const timeFlow = Date.now() * 0.0005; // Slowed down time progression
+
+        for (let layer = 1; layer <= layers; layer++) {
+            ctx.beginPath();
+            
+            // Simplified harmonic motion
+            for (let angle = 0; angle <= Math.PI * 2; angle += 0.1) { // Reduced sampling resolution
+                const dynamicRadius = baseRadius * (1 + 
+                    Math.sin(angle * 2 + timeFlow * layer) * 0.2
+                );
+
+                const x = dynamicRadius * Math.cos(angle);
+                const y = dynamicRadius * Math.sin(angle);
+
+                if (angle === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            const layerIntensity = intensity * (1 - layer/layers) * 0.7;
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${layerIntensity})`;
+            ctx.lineWidth = this.width * (1 - layer/layers);
+            ctx.globalCompositeOperation = 'lighter'; // More efficient blending
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    // Optimized Quantum Singularity Wave
+    drawQuantumSingularityWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        const timeWarp = Date.now() * 0.0003; // Slowed down time progression
+        const eventHorizonLayers = 6; // Reduced layers
+
+        for (let layer = 1; layer <= eventHorizonLayers; layer++) {
+            ctx.beginPath();
+            
+            // Simplified spiral calculation
+            for (let t = 0; t <= Math.PI * 2; t += 0.1) { // Reduced sampling resolution
+                const distortionFactor = Math.pow(1.1, layer);
+                const spiralRadius = baseRadius * (
+                    Math.exp(0.2 * t) / distortionFactor
+                );
+
+                const x = spiralRadius * Math.cos(t);
+                const y = spiralRadius * Math.sin(t);
+
+                if (t === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            const gravitationalIntensity = intensity * (1 - layer/eventHorizonLayers) * 0.8;
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${gravitationalIntensity})`;
+            ctx.lineWidth = this.width * (1.5 - layer/eventHorizonLayers);
+            ctx.globalCompositeOperation = 'lighter'; // More efficient blending
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    // Refined Fractal Consciousness Wave with Reduced Initial Vibration
+    drawFractalConsciousnessWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        const recursiveBranch = (x, y, length, angle, depth) => {
+            if (depth <= 0 || length < 1) return;
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            // Minimal vibration for the initial branch
+            const branchVariation = depth === 6 ? 0 : Math.sin(Date.now() * 0.003 * depth) * 0.5;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(
+                length / 3, -length * 0.4 * (1 + branchVariation),
+                length * 2/3, length * 0.4 * (1 - branchVariation),
+                length, 0
+            );
+
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity * (depth / 6)})`;
+            ctx.lineWidth = this.width * (depth / 6);
+            
+            ctx.stroke();
+
+            // Recursive branching with golden ratio
+            const goldenRatio = 1.618;
+            const branchProbability = 0.7;
+            const angleSpread = Math.PI / 3;
+
+            if (Math.random() < branchProbability) {
+                recursiveBranch(
+                    length, 0, 
+                    length / goldenRatio, 
+                    angleSpread, 
+                    depth - 1
+                );
+                recursiveBranch(
+                    length, 0, 
+                    length / goldenRatio, 
+                    -angleSpread, 
+                    depth - 1
+                );
+            }
+
+            ctx.restore();
+        };
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        recursiveBranch(0, 0, baseRadius, 0, 6);
+        ctx.restore();
+    }
+
+
+    // 
+    
+    drawSpiralWave(ctx) {
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        // Create a more controlled, expanding spiral
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity})`;
+        ctx.lineWidth = this.width;
+
+        const turns = 2.5; // Fewer, more controlled turns
+        const maxAngle = turns * Math.PI * 2;
+        
+        let lastX = this.x;
+        let lastY = this.y;
+
+        for (let angle = 0; angle <= maxAngle; angle += 0.1) {
+            // Archimedean spiral (more predictable expansion)
+            const spiralRadius = baseRadius * (angle / maxAngle);
+            const x = this.x + spiralRadius * Math.cos(angle);
+            const y = this.y + spiralRadius * Math.sin(angle);
+
+            if (angle === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+
+            lastX = x;
+            lastY = y;
+        }
+
+        ctx.stroke();
+    }
+
+    // Add this new method to your existing Wave class
+    drawFractalWave(ctx) {
+        const recursionDepth = 3;
+        const baseRadius = this.radius;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
+
+        const drawFractalBranch = (x, y, radius, angle, depth) => {
+            if (depth === 0) return;
+
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity / (depth + 1)})`;
+            ctx.lineWidth = this.width * (recursionDepth - depth + 1);
+
+            // Draw the current wave segment
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Recursive branches
+            const branchCount = 3;
+            const branchAngleSpread = Math.PI / 4;
+            const branchRadiusFactor = 0.6;
+
+            for (let i = 0; i < branchCount; i++) {
+                const branchAngle = angle + (i - branchCount/2) * branchAngleSpread;
+                const branchX = x + Math.cos(branchAngle) * radius;
+                const branchY = y + Math.sin(branchAngle) * radius;
+                
+                drawFractalBranch(
+                    branchX, 
+                    branchY, 
+                    radius * branchRadiusFactor, 
+                    branchAngle, 
+                    depth - 1
+                );
+            }
+        };
+
+        // Start the fractal wave from the center
+        drawFractalBranch(this.x, this.y, baseRadius, 0, recursionDepth);
     }
 
     distanceTo(other) {
@@ -147,6 +645,60 @@ class Wave {
         // Set common stroke style for the wave
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity})`;
         ctx.lineWidth = this.width * 2;
+        // 
+
+        // Add bacterial colony wave shape
+        if (config.waveShape === 'sophisticated-bacterial') {
+            this.drawSophisticatedBacterialColony(ctx);
+            return;
+        }
+         // Add new wave shape conditions
+         if (config.waveShape === 'ethereal-plasma') {
+            this.drawEtherealPlasmaWave(ctx);
+            return;
+        }
+
+        if (config.waveShape === 'quantum-singularity') {
+            this.drawQuantumSingularityWave(ctx);
+            return;
+        }
+
+        if (config.waveShape === 'fractal-consciousness') {
+            this.drawFractalConsciousnessWave(ctx);
+            return;
+        }
+
+        // 
+         // New advanced shape conditions
+         if (config.waveShape === 'cosmic-mandala') {
+            this.drawCosmicMandalaWave(ctx);
+            return;
+        }
+
+        if (config.waveShape === 'fractal-dendrite') {
+            this.drawFractalDendriteWave(ctx);
+            return;
+        }
+
+        if (config.waveShape === 'quantum-interference') {
+            this.drawQuantumInterferenceWave(ctx);
+            return;
+        }
+        // 
+        if (config.waveShape === 'flower') {
+            this.drawFlowerWave(ctx);
+            return;
+        }
+    
+        if (config.waveShape === 'spiral') {
+            this.drawSpiralWave(ctx);
+            return;
+        }
+        // Add the fractal wave option
+        if (config.waveShape === 'fractal') {
+            this.drawFractalWave(ctx);
+            return; // Exit after drawing fractal to prevent other shapes
+        }
 
         if (config.waveShape === 'circle') {
             ctx.beginPath();
@@ -375,7 +927,7 @@ function toggleAutoClick() {
         autoClickInterval = setInterval(() => {
             const { x, y } = getRandomPosition();
             handleClick(x, y);
-        }, 500); // Click every 500 milliseconds
+        }, 700); // Click every 500 milliseconds
         autoClickButton.textContent = 'Stop Auto-Click';
         autoClickButton.classList.add('active');
     }
