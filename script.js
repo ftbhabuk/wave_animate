@@ -11,7 +11,7 @@ const config = {
     trailEffect: false,
     gravityIntensity: 1,
     colorMode: 'monochrome', // Default to monochrome
-    waveShape: 'circle'      // Default shape for waves
+    waveShape: 'circle'      // Default shape for waves; now can be "circle", "square", "triangle", or "mandala"
 };
 
 function resize() {
@@ -26,6 +26,9 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+//
+// DROPLET CODE
+//
 class Droplet {
     constructor(x, y) {
         this.x = x;
@@ -75,13 +78,16 @@ class Droplet {
 
     draw(ctx) {
         ctx.beginPath();
-        // Drawing a square for each droplet. You can change to circle if needed.
+        // Drawing a square droplet (you can change this to a circle if you prefer)
         ctx.rect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
         ctx.fillStyle = `${this.color}${this.alpha})`;
         ctx.fill();
     }
 }
 
+//
+// WAVE CODE
+//
 class Wave {
     constructor(x, y, strength = 1) {
         this.x = x;
@@ -138,10 +144,10 @@ class Wave {
         const intensity = this.strength * this.energy;
         const [r, g, b] = this.currentColor;
     
+        // Set common stroke style for the wave
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity})`;
         ctx.lineWidth = this.width * 2;
 
-        // Draw based on the selected wave shape
         if (config.waveShape === 'circle') {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -150,7 +156,7 @@ class Wave {
             ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
         } else if (config.waveShape === 'triangle') {
             ctx.beginPath();
-            // Create an equilateral triangle centered at (x,y) and inscribed in a circle of radius
+            // Draw an equilateral triangle centered at (x,y) and inscribed in a circle of radius this.radius
             const angleOffset = -Math.PI / 2;
             for (let i = 0; i < 3; i++) {
                 const angle = angleOffset + i * (2 * Math.PI / 3);
@@ -164,6 +170,30 @@ class Wave {
             }
             ctx.closePath();
             ctx.stroke();
+        } else if (config.waveShape === 'mandala') {
+            // Draw a mandala-like pattern that expands gradually.
+            // The number of petals and petal shape are determined by the current radius.
+            const numPetals = 12;
+            const petalLength = this.radius;         // Use the current radius as the petal length
+            const petalWidth = this.radius / 3;        // Petal width scales with the radius
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            for (let i = 0; i < numPetals; i++) {
+                let angle = i * (2 * Math.PI / numPetals);
+                ctx.save();
+                ctx.rotate(angle);
+                ctx.beginPath();
+                // Start at the center
+                ctx.moveTo(0, 0);
+                // Draw a petal with a smooth bezier curve
+                ctx.bezierCurveTo(petalLength / 3, -petalWidth, 2 * petalLength / 3, -petalWidth, petalLength, 0);
+                // Mirror the curve back to the center
+                ctx.bezierCurveTo(2 * petalLength / 3, petalWidth, petalLength / 3, petalWidth, 0, 0);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.restore();
+            }
+            ctx.restore();
         }
     }
 }
@@ -198,6 +228,7 @@ function animate() {
     ctx.fillStyle = `rgba(0, 0, 0, ${config.backgroundFade})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Update and draw droplets
     droplets = droplets.filter(droplet => {
         const isAlive = droplet.update();
         if (isAlive) {
@@ -213,6 +244,7 @@ function animate() {
         }
     }
 
+    // Update and draw waves
     waves = waves.filter(wave => {
         const isAlive = wave.update();
         if (isAlive) {
@@ -282,7 +314,7 @@ document.getElementById('gravityIntensity').addEventListener('input', (e) => {
     document.getElementById('gravityIntensityValue').textContent = e.target.value;
 });
 
-// Wave shape selection listener
+// Wave shape selection listener (include the new "mandala" option)
 document.getElementById('waveShape').addEventListener('change', (e) => {
     config.waveShape = e.target.value;
 });
@@ -293,6 +325,29 @@ document.getElementById('resetButton').addEventListener('click', () => {
     droplets = [];
     waveCounter = 0;
 });
+
+// Add this code right after all your existing event listeners, before the animate() call
+
+// Dropdown functionality for control sections
+document.querySelectorAll('.section-header').forEach(header => {
+    header.addEventListener('click', () => {
+        // Toggle the active class on the next sibling (section-content)
+        const content = header.nextElementSibling;
+        content.classList.toggle('active');
+        
+        // Toggle the chevron icon
+        const icon = header.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        }
+    });
+});
+
+// // Initialize all sections as open by default
+// document.querySelectorAll('.section-content').forEach(content => {
+//     content.classList.add('active');
+// });
 
 animate();
 
@@ -337,3 +392,4 @@ function toggleColorMode() {
 }
 
 document.getElementById('colorModeButton').addEventListener('click', toggleColorMode);
+
