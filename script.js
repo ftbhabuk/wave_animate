@@ -10,7 +10,8 @@ const config = {
     colorPalette: 'white',
     trailEffect: false,
     gravityIntensity: 1,
-    colorMode: 'monochrome' // Default to monochrome
+    colorMode: 'monochrome', // Default to monochrome
+    waveShape: 'circle'      // Default shape for waves
 };
 
 function resize() {
@@ -74,53 +75,12 @@ class Droplet {
 
     draw(ctx) {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        // Drawing a square for each droplet. You can change to circle if needed.
+        ctx.rect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
         ctx.fillStyle = `${this.color}${this.alpha})`;
         ctx.fill();
     }
 }
-// Sidebar toggle functionality
-const sidebar = document.querySelector('.sidebar');
-const sidebarToggle = document.querySelector('.sidebar-toggle');
-
-sidebarToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-});
-
-// Section dropdown functionality
-document.querySelectorAll('.section-header').forEach(header => {
-    header.addEventListener('click', () => {
-        const content = header.nextElementSibling;
-        content.classList.toggle('active');
-        
-        const icon = header.querySelector('i');
-        icon.classList.toggle('fa-chevron-down');
-        icon.classList.toggle('fa-chevron-up');
-    });
-});
-
-// Additional control event listeners
-document.getElementById('colorPalette').addEventListener('change', (e) => {
-    config.colorPalette = e.target.value;
-});
-
-document.getElementById('trailEffect').addEventListener('change', (e) => {
-    config.trailEffect = e.target.checked;
-});
-
-document.getElementById('gravityIntensity').addEventListener('input', (e) => {
-    config.gravityIntensity = parseFloat(e.target.value);
-    document.getElementById('gravityIntensityValue').textContent = e.target.value;
-});
-
-// Reset button functionality
-document.getElementById('resetButton').addEventListener('click', () => {
-    waves = [];
-    droplets = [];
-    waveCounter = 0;
-});
-
-
 
 class Wave {
     constructor(x, y, strength = 1) {
@@ -128,12 +88,12 @@ class Wave {
         this.y = y;
         this.radius = 0;
         this.strength = strength;
-        this.speed = 5;
+        this.speed = config.waveSpeed;
         this.energy = 1;
         this.width = 2;
         this.collisions = new Set();
         
-        // Pure white color
+        // Base and current color for the wave
         this.baseColor = [255, 255, 255];
         this.currentColor = [...this.baseColor];
         this.hasInteracted = false;
@@ -146,7 +106,6 @@ class Wave {
 
     interact(other) {
         if (this === other) return;
-        
         if (this.collisions.has(other.id)) return;
         
         const distance = this.distanceTo(other);
@@ -178,23 +137,34 @@ class Wave {
     draw(ctx) {
         const intensity = this.strength * this.energy;
         const [r, g, b] = this.currentColor;
-        
-        const gradient = ctx.createRadialGradient(
-            this.x, this.y, this.radius - this.width,
-            this.x, this.y, this.radius + this.width
-        );
-
-        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
-        gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${intensity * 0.3})`);
-        gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${intensity})`);
-        gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, ${intensity * 0.3})`);
-        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = gradient;
+    
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity})`;
         ctx.lineWidth = this.width * 2;
-        ctx.stroke();
+
+        // Draw based on the selected wave shape
+        if (config.waveShape === 'circle') {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.stroke();
+        } else if (config.waveShape === 'square') {
+            ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        } else if (config.waveShape === 'triangle') {
+            ctx.beginPath();
+            // Create an equilateral triangle centered at (x,y) and inscribed in a circle of radius
+            const angleOffset = -Math.PI / 2;
+            for (let i = 0; i < 3; i++) {
+                const angle = angleOffset + i * (2 * Math.PI / 3);
+                const vx = this.x + this.radius * Math.cos(angle);
+                const vy = this.y + this.radius * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(vx, vy);
+                } else {
+                    ctx.lineTo(vx, vy);
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
     }
 }
 
@@ -236,6 +206,7 @@ function animate() {
         return isAlive;
     });
 
+    // Check collisions among waves
     for (let i = 0; i < waves.length; i++) {
         for (let j = i + 1; j < waves.length; j++) {
             waves[i].interact(waves[j]);
@@ -298,9 +269,34 @@ document.getElementById('backgroundFade').addEventListener('input', (e) => {
     document.getElementById('backgroundFadeValue').textContent = e.target.value;
 });
 
-animate();
-// Add to the existing script
+document.getElementById('colorPalette').addEventListener('change', (e) => {
+    config.colorPalette = e.target.value;
+});
 
+document.getElementById('trailEffect').addEventListener('change', (e) => {
+    config.trailEffect = e.target.checked;
+});
+
+document.getElementById('gravityIntensity').addEventListener('input', (e) => {
+    config.gravityIntensity = parseFloat(e.target.value);
+    document.getElementById('gravityIntensityValue').textContent = e.target.value;
+});
+
+// Wave shape selection listener
+document.getElementById('waveShape').addEventListener('change', (e) => {
+    config.waveShape = e.target.value;
+});
+
+// Reset button functionality
+document.getElementById('resetButton').addEventListener('click', () => {
+    waves = [];
+    droplets = [];
+    waveCounter = 0;
+});
+
+animate();
+
+// Auto-Click functionality
 let autoClickInterval = null;
 
 function getRandomPosition() {
@@ -329,7 +325,10 @@ function toggleAutoClick() {
         autoClickButton.classList.add('active');
     }
 }
-// Add event listener for color mode toggle
+
+document.getElementById('autoClickButton').addEventListener('click', toggleAutoClick);
+
+// Toggle color mode event listener
 function toggleColorMode() {
     config.colorMode = config.colorMode === 'monochrome' ? 'colorful' : 'monochrome';
     const colorModeButton = document.getElementById('colorModeButton');
@@ -337,7 +336,4 @@ function toggleColorMode() {
     colorModeButton.classList.toggle('colorful', config.colorMode === 'colorful');
 }
 
-// Add event listener for the auto-click button
-document.getElementById('autoClickButton').addEventListener('click', toggleAutoClick);
-// Add this to the existing script
 document.getElementById('colorModeButton').addEventListener('click', toggleColorMode);
