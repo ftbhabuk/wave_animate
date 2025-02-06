@@ -72,6 +72,15 @@
                        
                     </div>
                 </div>
+                <label>
+                    Wave Shape
+                    <select id="waveShape">
+                        <option value="circle">Circle</option>
+                        <option value="square">Square</option>
+                        <option value="triangle">Triangle</option>
+                    </select>
+                </label>
+                
 
                 <div class="control-section">
                     <div class="section-header" data-section="advanced">
@@ -101,7 +110,9 @@
                     <button id="resetButton">Reset Simulation</button>
                 </div>
             </div>
+            
         </div>
+        
         <canvas id="waveCanvas"></canvas>
     </div>
     <script src="script.js"></script>
