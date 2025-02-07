@@ -337,50 +337,50 @@ class Wave {
         ctx.restore();
     }
     // 
-    drawFlowerWave(ctx) {
-        const baseRadius = this.radius;
-        const intensity = this.strength * this.energy;
-        const [r, g, b] = this.currentColor;
+    // drawFlowerWave(ctx) {
+    //     const baseRadius = this.radius;
+    //     const intensity = this.strength * this.energy;
+    //     const [r, g, b] = this.currentColor;
 
-        ctx.save();
-        ctx.translate(this.x, this.y);
+    //     ctx.save();
+    //     ctx.translate(this.x, this.y);
 
-        const petalCount = 5; // Reduced number of petals for more control
-        const baseAngle = Math.PI * 2 / petalCount;
+    //     const petalCount = 5; // Reduced number of petals for more control
+    //     const baseAngle = Math.PI * 2 / petalCount;
 
-        for (let i = 0; i < petalCount; i++) {
-            ctx.save();
+    //     for (let i = 0; i < petalCount; i++) {
+    //         ctx.save();
             
-            // Rotate to create each petal
-            ctx.rotate(i * baseAngle);
+    //         // Rotate to create each petal
+    //         ctx.rotate(i * baseAngle);
 
-            // More controlled, symmetric petal shape
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
+    //         // More controlled, symmetric petal shape
+    //         ctx.beginPath();
+    //         ctx.moveTo(0, 0);
             
-            // Create a more symmetric, controlled curve
-            ctx.bezierCurveTo(
-                baseRadius / 3, -baseRadius * 0.8, 
-                baseRadius * 2/3, -baseRadius * 0.8, 
-                baseRadius, 0
-            );
-            ctx.bezierCurveTo(
-                baseRadius * 2/3, baseRadius * 0.8, 
-                baseRadius / 3, baseRadius * 0.8, 
-                0, 0
-            );
+    //         // Create a more symmetric, controlled curve
+    //         ctx.bezierCurveTo(
+    //             baseRadius / 3, -baseRadius * 0.8, 
+    //             baseRadius * 2/3, -baseRadius * 0.8, 
+    //             baseRadius, 0
+    //         );
+    //         ctx.bezierCurveTo(
+    //             baseRadius * 2/3, baseRadius * 0.8, 
+    //             baseRadius / 3, baseRadius * 0.8, 
+    //             0, 0
+    //         );
 
-            // Vary opacity slightly between petals
-            const petalIntensity = intensity * (0.7 + Math.sin(i) * 0.3);
-            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${petalIntensity})`;
-            ctx.lineWidth = this.width;
+    //         // Vary opacity slightly between petals
+    //         const petalIntensity = intensity * (0.7 + Math.sin(i) * 0.3);
+    //         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${petalIntensity})`;
+    //         ctx.lineWidth = this.width;
             
-            ctx.stroke();
-            ctx.restore();
-        }
+    //         ctx.stroke();
+    //         ctx.restore();
+    //     }
 
-        ctx.restore();
-    }
+    //     ctx.restore();
+    // }
     // 
       // Ethereal Plasma Dynamics Wave
       drawEtherealPlasmaWave(ctx) {
