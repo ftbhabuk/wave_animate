@@ -11,7 +11,15 @@ const config = {
     trailEffect: false,
     gravityIntensity: 1,
     colorMode: 'monochrome', // Default to monochrome
-    waveShape: 'circle'      // Default shape for waves; now can be "circle", "square", "triangle", or "mandala"
+    waveShape: 'circle',
+    availableShapes: [
+        'circle', 'square', 'triangle', 'mandala', 'spiral', 'fractal',
+        'fireworks',  'ethereal-plasma',
+        'quantum-singularity', 'fractal-consciousness', 'cosmic-mandala',
+        'fractal-dendrite', 'quantum-interference'
+    ],
+    useRandomShapes: false  // New config property for random shape toggle
+     // Default shape for waves; now can be "circle", "square", "triangle", or "mandala"
 };
 
 function resize() {
@@ -166,30 +174,7 @@ class Wave {
         ctx.restore();
     }
 
-    drawElegantCellBuds(ctx, baseRadius, intensity, [r, g, b]) {
-        const timeFlow = Date.now() * 0.0008;
-        const budCount = 8; // Reduced for performance
-
-        ctx.beginPath();
-        for (let i = 0; i < budCount; i++) {
-            const angle = (i / budCount) * Math.PI * 2;
-            const budDistance = baseRadius * (1.2 + Math.sin(timeFlow + i * 0.5) * 0.1);
-            
-            const x = budDistance * Math.cos(angle);
-            const y = budDistance * Math.sin(angle);
-
-            // Softer, more organic bud representation
-            const budSize = baseRadius * 0.08 * (1 + Math.sin(timeFlow * 2 + i) * 0.2);
-            
-            ctx.moveTo(x + budSize, y);
-            ctx.arc(x, y, budSize, 0, Math.PI * 2);
-        }
-
-        const budIntensity = intensity * 0.4;
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${budIntensity})`;
-        ctx.fill();
-    }
-    // 
+   
     drawCosmicMandalaWave(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
@@ -336,52 +321,7 @@ class Wave {
 
         ctx.restore();
     }
-    // 
-    // drawFlowerWave(ctx) {
-    //     const baseRadius = this.radius;
-    //     const intensity = this.strength * this.energy;
-    //     const [r, g, b] = this.currentColor;
-
-    //     ctx.save();
-    //     ctx.translate(this.x, this.y);
-
-    //     const petalCount = 5; // Reduced number of petals for more control
-    //     const baseAngle = Math.PI * 2 / petalCount;
-
-    //     for (let i = 0; i < petalCount; i++) {
-    //         ctx.save();
-            
-    //         // Rotate to create each petal
-    //         ctx.rotate(i * baseAngle);
-
-    //         // More controlled, symmetric petal shape
-    //         ctx.beginPath();
-    //         ctx.moveTo(0, 0);
-            
-    //         // Create a more symmetric, controlled curve
-    //         ctx.bezierCurveTo(
-    //             baseRadius / 3, -baseRadius * 0.8, 
-    //             baseRadius * 2/3, -baseRadius * 0.8, 
-    //             baseRadius, 0
-    //         );
-    //         ctx.bezierCurveTo(
-    //             baseRadius * 2/3, baseRadius * 0.8, 
-    //             baseRadius / 3, baseRadius * 0.8, 
-    //             0, 0
-    //         );
-
-    //         // Vary opacity slightly between petals
-    //         const petalIntensity = intensity * (0.7 + Math.sin(i) * 0.3);
-    //         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${petalIntensity})`;
-    //         ctx.lineWidth = this.width;
-            
-    //         ctx.stroke();
-    //         ctx.restore();
-    //     }
-
-    //     ctx.restore();
-    // }
-    // 
+   
       // Ethereal Plasma Dynamics Wave
       drawEtherealPlasmaWave(ctx) {
         const baseRadius = this.radius;
@@ -526,41 +466,84 @@ class Wave {
 
 
     // 
-    
     drawSpiralWave(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
         const [r, g, b] = this.currentColor;
-
-        // Create a more controlled, expanding spiral
+    
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity})`;
-        ctx.lineWidth = this.width;
-
-        const turns = 2.5; // Fewer, more controlled turns
+        const turns = 5; // More turns for a stronger hypnotic effect
         const maxAngle = turns * Math.PI * 2;
         
-        let lastX = this.x;
-        let lastY = this.y;
-
-        for (let angle = 0; angle <= maxAngle; angle += 0.1) {
-            // Archimedean spiral (more predictable expansion)
-            const spiralRadius = baseRadius * (angle / maxAngle);
+        for (let angle = 0; angle <= maxAngle; angle += 0.05) {
+            // Hypnotic spiral effect using oscillation
+            const spiralRadius = baseRadius * (angle / maxAngle) * (1 + 0.2 * Math.sin(angle * 6));
+    
             const x = this.x + spiralRadius * Math.cos(angle);
             const y = this.y + spiralRadius * Math.sin(angle);
-
+    
+            // Oscillating stroke width for depth effect
+            ctx.lineWidth = this.width * (0.5 + 0.5 * Math.cos(angle * 4));
+    
+            // Smooth fading gradient
+            const opacity = Math.max(intensity * (1 - angle / maxAngle), 0.2);
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    
             if (angle === 0) {
                 ctx.moveTo(x, y);
             } else {
                 ctx.lineTo(x, y);
             }
-
-            lastX = x;
-            lastY = y;
         }
-
+    
         ctx.stroke();
     }
+    drawFirework(ctx) {
+        const baseRadius = this.radius;
+    const intensity = this.strength * this.energy;
+    const [r, g, b] = this.currentColor;
+
+    ctx.lineWidth = this.width;
+    ctx.shadowBlur = 0; // Soft glow for elegance
+    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
+
+    const turns = 5; // Balanced turns
+    const maxAngle = turns * Math.PI * 2;
+
+    ctx.beginPath();
+    for (let angle = 0; angle <= maxAngle; angle += 0.05) {
+        // Smooth, hypnotic spiral growth with gentle oscillation
+        const spiralRadius = baseRadius * (angle / maxAngle) * (1 + 0.12 * Math.sin(angle * 5));
+
+        const x = this.x + spiralRadius * Math.cos(angle);
+        const y = this.y + spiralRadius * Math.sin(angle);
+
+        // Fading color with soft transitions
+        const fade = Math.max(intensity * (1 - angle / maxAngle), 0.3);
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${fade})`;
+
+        // Smooth curving effect
+        ctx.lineWidth = this.width * (0.6 + 0.4 * Math.cos(angle * 3));
+
+        if (angle === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+
+        // **Light Trail Effect:** Adds subtle highlights for elegance
+        if (angle % 0.4 < 0.05) {
+            ctx.beginPath();
+            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
+            ctx.fill();
+        }
+    }
+    ctx.stroke();
+}
+    
+    
+    
 
     // Add this new method to your existing Wave class
     drawFractalWave(ctx) {
@@ -646,6 +629,10 @@ class Wave {
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity})`;
         ctx.lineWidth = this.width * 2;
         // 
+        if (config.waveShape === 'fireworks') {
+            this.drawFirework(ctx);
+            return;
+        }
 
         // Add bacterial colony wave shape
         if (config.waveShape === 'sophisticated-bacterial') {
@@ -878,9 +865,6 @@ document.getElementById('resetButton').addEventListener('click', () => {
     waveCounter = 0;
 });
 
-// Add this code right after all your existing event listeners, before the animate() call
-
-// Dropdown functionality for control sections
 document.querySelectorAll('.section-header').forEach(header => {
     header.addEventListener('click', () => {
         // Toggle the active class on the next sibling (section-content)
@@ -896,11 +880,6 @@ document.querySelectorAll('.section-header').forEach(header => {
     });
 });
 
-// // Initialize all sections as open by default
-// document.querySelectorAll('.section-content').forEach(content => {
-//     content.classList.add('active');
-// });
-
 animate();
 
 // Auto-Click functionality
@@ -913,6 +892,18 @@ function getRandomPosition() {
     };
 }
 
+// Add event listener for the random shapes toggle
+document.getElementById('randomShapesToggle').addEventListener('change', (e) => {
+    config.useRandomShapes = e.target.checked;
+});
+
+// Function to get a random shape
+function getRandomShape() {
+    const randomIndex = Math.floor(Math.random() * config.availableShapes.length);
+    return config.availableShapes[randomIndex];
+}
+
+// Update the toggleAutoClick function
 function toggleAutoClick() {
     const autoClickButton = document.getElementById('autoClickButton');
     
@@ -926,8 +917,20 @@ function toggleAutoClick() {
         // Start auto-clicking
         autoClickInterval = setInterval(() => {
             const { x, y } = getRandomPosition();
-            handleClick(x, y);
-        }, 700); // Click every 500 milliseconds
+            
+            // If random shapes are enabled, change the shape before creating the splash
+            if (config.useRandomShapes) {
+                const previousShape = config.waveShape;
+                config.waveShape = getRandomShape();
+                handleClick(x, y);
+                // Optional: revert to the previous shape after creating the splash
+                // Remove this if you want to keep the random shape
+                // config.waveShape = previousShape;
+            } else {
+                handleClick(x, y);
+            }
+        }, 700);
+        
         autoClickButton.textContent = 'Stop Auto-Click';
         autoClickButton.classList.add('active');
     }
