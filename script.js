@@ -2,15 +2,15 @@ const canvas = document.getElementById('waveCanvas');
 const ctx = canvas.getContext('2d');
 
 const config = {
-    dropletCount: 3,  // We'll keep this name but use it for number of waves
+    dropletCount: 3,  // Number of waves
     dropletVelocity: 15,
-    waveSpeed: 5,
+    waveSpeed: 1,
     waveStrength: 1,
-    backgroundFade: 0.1,
+    backgroundFade: 0.4,
     colorPalette: 'white',
     trailEffect: false,
     gravityIntensity: 1,
-    colorMode: 'monochrome', // Default to monochrome
+    colorMode: 'colorful',
     waveShape: 'circle',
     availableShapes: [
         'circle', 'square', 'triangle', 'mandala', 'spiral', 'fractal',
@@ -18,7 +18,8 @@ const config = {
         'quantum-singularity', 'fractal-consciousness', 'cosmic-mandala',
         'fractal-dendrite', 'quantum-interference'
     ],
-    useRandomShapes: false  // New config property for random shape toggle
+    useRandomShapes: false,
+    dropletDelay: 100, // Wave Delay
 };
 
 function resize() {
@@ -748,26 +749,32 @@ function addWave(x, y, strength = 1) {
     waves.push(wave);
 }
 
-// Modified to create waves without visually showing droplets
+// Modify the createSplash function to use setTimeout for delayed waves
 function createSplash(x, y) {
-    // First, add the main wave at the click point
+    // Add the main wave immediately at the click point
     addWave(x, y, 1);
-    
-    // Add more waves in the background (these replace visible droplets)
-    const numWaves = config.dropletCount;
-    for (let i = 0; i < numWaves; i++) {
-        // Add droplets to the internal state but we won't draw them
-        droplets.push(new Droplet(x, y));
-    }
 
-    // Add some additional smaller waves with slight offset for a richer effect
-    for (let i = 0; i < 3; i++) {
-        const offset = 5;
-        const rx = x + (Math.random() - 0.5) * offset;
-        const ry = y + (Math.random() - 0.5) * offset;
-        addWave(rx, ry, 0.7 - i * 0.2);
+    // Create delayed waves
+    const numWaves = config.dropletCount;
+
+    for (let i = 0; i < numWaves; i++) {
+        (function(index) { // IIFE to capture the value of 'i'
+            setTimeout(() => {
+                // Add droplet to internal state
+                // droplets.push(new Droplet(x, y));  // REMOVE THIS LINE
+
+                // Add a smaller wave with slight offset for each delayed droplet
+                const offset = 5;
+                const rx = x + (Math.random() - 0.5) * offset;
+                const ry = y + (Math.random() - 0.5) * offset;
+                addWave(rx, ry, 0.7 - (index * 0.2)); // Use 'index' instead of 'i'
+            }, index * config.dropletDelay); // Multiply delay by index to stagger them
+        })(i); // Pass the current value of 'i' to the IIFE
     }
 }
+
+
+
 
 function animate() {
     ctx.fillStyle = `rgba(0, 0, 0, ${config.backgroundFade})`;
@@ -816,6 +823,12 @@ canvas.addEventListener('touchstart', (e) => {
     handleClick(touch.clientX, touch.clientY);
 }, { passive: false });
 
+
+// Add event listener for the delay slider (add this to your event listeners section)
+document.getElementById('dropletDelay').addEventListener('input', (e) => {
+    config.dropletDelay = parseInt(e.target.value);
+    document.getElementById('dropletDelayValue').textContent = e.target.value;
+});
 // Sidebar control event listeners
 document.getElementById('dropletCount').addEventListener('input', (e) => {
     config.dropletCount = parseInt(e.target.value);

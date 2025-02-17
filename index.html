@@ -16,35 +16,42 @@
                 
                 <div class="control-section">
                     <div class="section-header" data-section="droplets">
-                        <h3>Droplets <i class="fas fa-chevron-down"></i></h3>
-                    </div>
-                    <div class="section-content">
-                        <label>
-                            Number of Droplets
-                            <input type="range" id="dropletCount" min="0" max="50" value="20">
-                            <span id="dropletCountValue">20</span>
-                        </label>
-                        <label>
-                            Droplet Velocity
-                            <input type="range" id="dropletVelocity" min="10" max="30" value="15" step="0.5">
-                            <span id="dropletVelocityValue">15</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="control-section">
-                    <div class="section-header" data-section="waves">
                         <h3>Waves <i class="fas fa-chevron-down"></i></h3>
                     </div>
                     <div class="section-content">
                         <label>
-                            Wave Speed
-                            <input type="range" id="waveSpeed" min="1" max="10" value="5" step="0.5">
-                            <span id="waveSpeedValue">5</span>
+                            Number of Waves:
+                            <input type="range" id="dropletCount" min="1" max="5" value="3">
+                            <span id="dropletCountValue">3</span>
                         </label>
                         <label>
-                            Wave Strength
-                            <input type="range" id="waveStrength" min="0.1" max="2" value="1" step="0.1">
+                            Wave Velocity:
+                            <input type="range" id="dropletVelocity" min="5" max="25" value="15" step="0.5">
+                            <span id="dropletVelocityValue">15</span>
+                        </label>
+
+                        <div class="control-group">
+                            <label for="dropletDelay">Wave Delay:</label>
+                            <input type="range" id="dropletDelay" min="0" max="500" step="25" value="100">
+                            <span id="dropletDelayValue">100</span>
+                        </div>
+                    </div>
+                </div>
+               
+
+                <div class="control-section">
+                    <div class="section-header" data-section="waves">
+                        <h3>Wave Properties <i class="fas fa-chevron-down"></i></h3>
+                    </div>
+                    <div class="section-content">
+                        <label>
+                            Wave Speed:
+                            <input type="range" id="waveSpeed" min="1" max="5" value="1" step="1">
+                            <span id="waveSpeedValue">1</span>
+                        </label>
+                        <label>
+                            Wave Strength:
+                            <input type="range" id="waveStrength" min="1" max="1.5" value="1" step="0.1">
                             <span id="waveStrengthValue">1</span>
                         </label>
                     </div>
@@ -56,12 +63,12 @@
                     </div>
                     <div class="section-content">
                         <label>
-                            Background Fade
-                            <input type="range" id="backgroundFade" min="0.05" max="0.2" value="0.1" step="0.01">
-                            <span id="backgroundFadeValue">0.1</span>
+                            Background Fade:
+                            <input type="range" id="backgroundFade" min="0.1" max="0.5" value="0.1" step="0.1">
+                            <span id="backgroundFadeValue">0.4</span>
                         </label>
                         <label>
-                            Color Palette
+                            Color Palette:
                             <select id="colorPalette">
                                 <option value="white">White</option>
                                 <option value="blue">Blue</option>
@@ -73,7 +80,7 @@
                     </div>
                 </div>
                 <label>
-                    Wave Shape
+                    Wave Shape:
                     <select id="waveShape">
                         <option value="circle">Circle</option>
                         <option value="square">Square</option>
@@ -104,7 +111,7 @@
                             <input type="checkbox" id="trailEffect"> Enable Trail Effect
                         </label>
                         <label>
-                            Gravity Intensity
+                            Gravity Intensity:
                             <input type="range" id="gravityIntensity" min="0.5" max="1.5" value="1" step="0.1">
                             <span id="gravityIntensityValue">1</span>
                         </label>
@@ -113,14 +120,14 @@
                         </label>
                         <div class="control-group">
                             <input type="checkbox" id="randomShapesToggle">
-                            <label for="randomShapesToggle">Rand. Shapes</label>
+                            <label for="randomShapesToggle">Random Shapes</label>
                         </div>
                         
                         
                     </div>
                     <label>
                         <br>    
-                        <button id="colorModeButton" class="color-mode-btn">Color Mode: monochrome</button>
+                        <button id="colorModeButton" class="color-mode-btn">Color Mode: colorful</button>
                     </label>
                 </div>
 
