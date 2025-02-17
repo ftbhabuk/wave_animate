@@ -2,7 +2,7 @@ const canvas = document.getElementById('waveCanvas');
 const ctx = canvas.getContext('2d');
 
 const config = {
-    dropletCount: 0,
+    dropletCount: 3,  // We'll keep this name but use it for number of waves
     dropletVelocity: 15,
     waveSpeed: 5,
     waveStrength: 1,
@@ -19,7 +19,6 @@ const config = {
         'fractal-dendrite', 'quantum-interference'
     ],
     useRandomShapes: false  // New config property for random shape toggle
-     // Default shape for waves; now can be "circle", "square", "triangle", or "mandala"
 };
 
 function resize() {
@@ -34,9 +33,7 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-//
-// DROPLET CODE
-//
+// Keep the Droplet class for internal functionality, but not for visual rendering
 class Droplet {
     constructor(x, y) {
         this.x = x;
@@ -84,18 +81,10 @@ class Droplet {
         return this.alpha > 0;
     }
 
-    draw(ctx) {
-        ctx.beginPath();
-        // Drawing a square droplet (you can change this to a circle if you prefer)
-        ctx.rect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
-        ctx.fillStyle = `${this.color}${this.alpha})`;
-        ctx.fill();
-    }
+    // We're removing the draw method since we don't want to see droplets
+    // But keeping the update method for functionality
 }
 
-//
-// WAVE CODE
-//
 class Wave {
     constructor(x, y, strength = 1) {
         this.x = x;
@@ -115,7 +104,6 @@ class Wave {
         this.waveShape = config.waveShape; // Add this line to track current wave shape
     }
 
-    // 
     drawSophisticatedBacterialColony(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
@@ -174,7 +162,26 @@ class Wave {
         ctx.restore();
     }
 
-   
+    drawElegantCellBuds(ctx, baseRadius, intensity, colorRGB) {
+        const [r, g, b] = colorRGB;
+        const budCount = 5;
+        const timeFlow = Date.now() * 0.0005;
+        
+        for (let i = 0; i < budCount; i++) {
+            const angle = (i / budCount) * Math.PI * 2 + timeFlow;
+            const budDistance = baseRadius * 0.85;
+            const budSize = baseRadius * 0.2;
+            
+            const x = budDistance * Math.cos(angle);
+            const y = budDistance * Math.sin(angle);
+            
+            ctx.beginPath();
+            ctx.arc(x, y, budSize, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${intensity * 0.4})`;
+            ctx.fill();
+        }
+    }
+
     drawCosmicMandalaWave(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
@@ -228,7 +235,6 @@ class Wave {
         ctx.restore();
     }
 
-    // Fractal Dendrite Wave - Organic, branching neural-like network
     drawFractalDendriteWave(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
@@ -321,9 +327,9 @@ class Wave {
 
         ctx.restore();
     }
-   
-      // Ethereal Plasma Dynamics Wave
-      drawEtherealPlasmaWave(ctx) {
+
+    // Ethereal Plasma Dynamics Wave
+    drawEtherealPlasmaWave(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
         const [r, g, b] = this.currentColor;
@@ -464,8 +470,10 @@ class Wave {
         ctx.restore();
     }
 
+    drawFlowerWave(ctx) {
+        // Implementation for flower wave...
+    }
 
-    // 
     drawSpiralWave(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
@@ -498,54 +506,51 @@ class Wave {
     
         ctx.stroke();
     }
+
     drawFirework(ctx) {
         const baseRadius = this.radius;
-    const intensity = this.strength * this.energy;
-    const [r, g, b] = this.currentColor;
+        const intensity = this.strength * this.energy;
+        const [r, g, b] = this.currentColor;
 
-    ctx.lineWidth = this.width;
-    ctx.shadowBlur = 0; // Soft glow for elegance
-    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
+        ctx.lineWidth = this.width;
+        ctx.shadowBlur = 0; // Soft glow for elegance
+        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
 
-    const turns = 5; // Balanced turns
-    const maxAngle = turns * Math.PI * 2;
+        const turns = 5; // Balanced turns
+        const maxAngle = turns * Math.PI * 2;
 
-    ctx.beginPath();
-    for (let angle = 0; angle <= maxAngle; angle += 0.05) {
-        // Smooth, hypnotic spiral growth with gentle oscillation
-        const spiralRadius = baseRadius * (angle / maxAngle) * (1 + 0.12 * Math.sin(angle * 5));
+        ctx.beginPath();
+        for (let angle = 0; angle <= maxAngle; angle += 0.05) {
+            // Smooth, hypnotic spiral growth with gentle oscillation
+            const spiralRadius = baseRadius * (angle / maxAngle) * (1 + 0.12 * Math.sin(angle * 5));
 
-        const x = this.x + spiralRadius * Math.cos(angle);
-        const y = this.y + spiralRadius * Math.sin(angle);
+            const x = this.x + spiralRadius * Math.cos(angle);
+            const y = this.y + spiralRadius * Math.sin(angle);
 
-        // Fading color with soft transitions
-        const fade = Math.max(intensity * (1 - angle / maxAngle), 0.3);
-        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${fade})`;
+            // Fading color with soft transitions
+            const fade = Math.max(intensity * (1 - angle / maxAngle), 0.3);
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${fade})`;
 
-        // Smooth curving effect
-        ctx.lineWidth = this.width * (0.6 + 0.4 * Math.cos(angle * 3));
+            // Smooth curving effect
+            ctx.lineWidth = this.width * (0.6 + 0.4 * Math.cos(angle * 3));
 
-        if (angle === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
+            if (angle === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+
+            // Light Trail Effect: Adds subtle highlights for elegance
+            if (angle % 0.4 < 0.05) {
+                ctx.beginPath();
+                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
+                ctx.fill();
+            }
         }
-
-        // **Light Trail Effect:** Adds subtle highlights for elegance
-        if (angle % 0.4 < 0.05) {
-            ctx.beginPath();
-            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
-            ctx.fill();
-        }
+        ctx.stroke();
     }
-    ctx.stroke();
-}
-    
-    
-    
 
-    // Add this new method to your existing Wave class
     drawFractalWave(ctx) {
         const recursionDepth = 3;
         const baseRadius = this.radius;
@@ -628,19 +633,18 @@ class Wave {
         // Set common stroke style for the wave
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity})`;
         ctx.lineWidth = this.width * 2;
-        // 
+        
         if (config.waveShape === 'fireworks') {
             this.drawFirework(ctx);
             return;
         }
 
-        // Add bacterial colony wave shape
         if (config.waveShape === 'sophisticated-bacterial') {
             this.drawSophisticatedBacterialColony(ctx);
             return;
         }
-         // Add new wave shape conditions
-         if (config.waveShape === 'ethereal-plasma') {
+
+        if (config.waveShape === 'ethereal-plasma') {
             this.drawEtherealPlasmaWave(ctx);
             return;
         }
@@ -655,9 +659,7 @@ class Wave {
             return;
         }
 
-        // 
-         // New advanced shape conditions
-         if (config.waveShape === 'cosmic-mandala') {
+        if (config.waveShape === 'cosmic-mandala') {
             this.drawCosmicMandalaWave(ctx);
             return;
         }
@@ -671,7 +673,7 @@ class Wave {
             this.drawQuantumInterferenceWave(ctx);
             return;
         }
-        // 
+
         if (config.waveShape === 'flower') {
             this.drawFlowerWave(ctx);
             return;
@@ -681,10 +683,10 @@ class Wave {
             this.drawSpiralWave(ctx);
             return;
         }
-        // Add the fractal wave option
+
         if (config.waveShape === 'fractal') {
             this.drawFractalWave(ctx);
-            return; // Exit after drawing fractal to prevent other shapes
+            return;
         }
 
         if (config.waveShape === 'circle') {
@@ -711,10 +713,9 @@ class Wave {
             ctx.stroke();
         } else if (config.waveShape === 'mandala') {
             // Draw a mandala-like pattern that expands gradually.
-            // The number of petals and petal shape are determined by the current radius.
             const numPetals = 12;
-            const petalLength = this.radius;         // Use the current radius as the petal length
-            const petalWidth = this.radius / 3;        // Petal width scales with the radius
+            const petalLength = this.radius;
+            const petalWidth = this.radius / 3;
             ctx.save();
             ctx.translate(this.x, this.y);
             for (let i = 0; i < numPetals; i++) {
@@ -747,14 +748,19 @@ function addWave(x, y, strength = 1) {
     waves.push(wave);
 }
 
+// Modified to create waves without visually showing droplets
 function createSplash(x, y) {
+    // First, add the main wave at the click point
     addWave(x, y, 1);
     
-    const numDroplets = config.dropletCount;
-    for (let i = 0; i < numDroplets; i++) {
+    // Add more waves in the background (these replace visible droplets)
+    const numWaves = config.dropletCount;
+    for (let i = 0; i < numWaves; i++) {
+        // Add droplets to the internal state but we won't draw them
         droplets.push(new Droplet(x, y));
     }
 
+    // Add some additional smaller waves with slight offset for a richer effect
     for (let i = 0; i < 3; i++) {
         const offset = 5;
         const rx = x + (Math.random() - 0.5) * offset;
@@ -767,13 +773,9 @@ function animate() {
     ctx.fillStyle = `rgba(0, 0, 0, ${config.backgroundFade})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Update and draw droplets
+    // Update droplets but don't draw them
     droplets = droplets.filter(droplet => {
-        const isAlive = droplet.update();
-        if (isAlive) {
-            droplet.draw(ctx);
-        }
-        return isAlive;
+        return droplet.update(); // Only update, no drawing
     });
 
     // Check collisions among waves
