@@ -1,14 +1,14 @@
-const canvas = document.getElementById('waveCanvas');
+ const canvas = document.getElementById('waveCanvas');
 const ctx = canvas.getContext('2d');
 
 const config = {
-    dropletCount: 3,  // Number of waves
+    dropletCount: 1,  // Number of waves
     dropletVelocity: 15,
     waveSpeed: 1,
     waveStrength: 1,
     backgroundFade: 0.4,
     colorPalette: 'white',
-    trailEffect: false,
+    trailEffect: true,
     gravityIntensity: 1,
     colorMode: 'colorful',
     waveShape: 'circle',
@@ -20,6 +20,7 @@ const config = {
     ],
     useRandomShapes: false,
     dropletDelay: 100, // Wave Delay
+    waveSpread: 1.6, // Renamed from gravityIntensity
 };
 
 function resize() {
@@ -750,6 +751,7 @@ function addWave(x, y, strength = 1) {
 }
 
 // Modify the createSplash function to use setTimeout for delayed waves
+// In the createSplash function:
 function createSplash(x, y) {
     // Add the main wave immediately at the click point
     addWave(x, y, 1);
@@ -760,11 +762,11 @@ function createSplash(x, y) {
     for (let i = 0; i < numWaves; i++) {
         (function(index) { // IIFE to capture the value of 'i'
             setTimeout(() => {
-                // Add droplet to internal state
-                // droplets.push(new Droplet(x, y));  // REMOVE THIS LINE
+                // Add droplet to internal state (optional, keep if you need it for other logic)
+                // droplets.push(new Droplet(x, y));
 
                 // Add a smaller wave with slight offset for each delayed droplet
-                const offset = 5;
+                const offset = 5 * config.waveSpread; // Scale the offset by waveSpread
                 const rx = x + (Math.random() - 0.5) * offset;
                 const ry = y + (Math.random() - 0.5) * offset;
                 addWave(rx, ry, 0.7 - (index * 0.2)); // Use 'index' instead of 'i'
@@ -831,6 +833,17 @@ canvas.addEventListener('touchstart', (e) => {
     handleClick(touch.clientX, touch.clientY);
 }, { passive: false });
 
+document.getElementById('waveSpread').addEventListener('input', (e) => {
+    config.waveSpread = parseFloat(e.target.value);
+    document.getElementById('waveSpreadValue').textContent = e.target.value;
+});
+
+
+// Event listener for the waveSpread slider:
+document.getElementById('gravityIntensity').addEventListener('input', (e) => { // Keep the ID for now
+    config.waveSpread = parseFloat(e.target.value);
+    document.getElementById('gravityIntensityValue').textContent = e.target.value; // Keep the ID for now
+});
 
 // Add event listener for the delay slider (add this to your event listeners section)
 document.getElementById('dropletDelay').addEventListener('input', (e) => {

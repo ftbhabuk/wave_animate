@@ -20,9 +20,16 @@
                     </div>
                     <div class="section-content">
                         <label>
+                            Wave Spread:
+                            <input type="range" id="waveSpread" min="0.0" max="10.0" value="1.6" step="0.1">
+                            <span id="waveSpreadValue">1.6</span>
+                        </label>
+                        
+
+                        <label>
                             Number of Waves:
-                            <input type="range" id="dropletCount" min="1" max="5" value="3">
-                            <span id="dropletCountValue">3</span>
+                            <input type="range" id="dropletCount" min="1" max="5" value="1">
+                            <span id="dropletCountValue">1</span>
                         </label>
                         <label>
                             Wave Velocity:
@@ -64,7 +71,7 @@
                     <div class="section-content">
                         <label>
                             Background Fade:
-                            <input type="range" id="backgroundFade" min="0.1" max="0.5" value="0.1" step="0.1">
+                            <input type="range" id="backgroundFade" min="0.1" max="0.5" value="0.4" step="0.1">
                             <span id="backgroundFadeValue">0.4</span>
                         </label>
                         <label>
@@ -108,7 +115,7 @@
                     </div>
                     <div class="section-content">
                         <label>
-                            <input type="checkbox" id="trailEffect"> Enable Trail Effect
+                            <input type="checkbox" id="trailEffect" checked> Enable Trail Effect
                         </label>
                         <label>
                             Gravity Intensity:
