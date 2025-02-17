@@ -777,8 +777,16 @@ function createSplash(x, y) {
 
 
 function animate() {
-    ctx.fillStyle = `rgba(0, 0, 0, ${config.backgroundFade})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (config.trailEffect) {
+        // Semi-transparent fill for trail effect
+        ctx.fillStyle = `rgba(0, 0, 0, ${config.backgroundFade})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+        // Clear the canvas completely
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = `rgba(0, 0, 0, ${config.backgroundFade})`; // Still fill for base background
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     // Update droplets but don't draw them
     droplets = droplets.filter(droplet => {
