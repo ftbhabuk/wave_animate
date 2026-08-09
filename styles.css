@@ -21,6 +21,7 @@ body {
 canvas {
     flex-grow: 1;
     background: #000000;
+    touch-action: none;
 }
 
 .sidebar {
@@ -80,11 +81,7 @@ canvas {
 .section-content {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease;
-}
-
-.section-content.active {
-    max-height: 500px;
+    transition: max-height 0.3s ease-out;
 }
 
 label {

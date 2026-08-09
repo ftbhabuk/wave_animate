@@ -3,14 +3,12 @@ const ctx = canvas.getContext('2d');
 
 const config = {
     dropletCount: 1,  // Number of waves
-    dropletVelocity: 15,
     waveSpeed: 1,
     waveStrength: 1,
     backgroundFade: 0.4,
     colorPalette: 'white',
     trailEffect: true,
     gravityIntensity: 1,
-    colorMode: 'colorful',
     waveShape: 'circle',
     availableShapes: [
         'circle', 'square', 'triangle', 'mandala', 'spiral', 'fractal',
@@ -44,7 +42,7 @@ class Droplet {
         this.startX = x;
         this.startY = y;
         this.velocityX = (Math.random() - 0.5) * 1;
-        this.velocityY = -config.dropletVelocity - Math.random() * 1;
+        this.velocityY = -15 - Math.random() * 1;
         this.gravity = 0.8 * config.gravityIntensity;
         this.size = Math.random() * 2 + 1;
         this.alpha = 1;
@@ -96,7 +94,6 @@ class Wave {
         this.baseColor = [255, 255, 255];
         this.currentColor = [...this.baseColor];
         this.hasInteracted = false;
-        this.colorMode = config.colorMode;
         this.waveShape = config.waveShape; // Store initial shape at creation
     }
 
@@ -346,10 +343,6 @@ class Wave {
         ctx.restore();
     }
 
-    drawFlowerWave(ctx) {
-        // Placeholder for flower wave
-    }
-
     drawSpiralWave(ctx) {
         const baseRadius = this.radius;
         const intensity = this.strength * this.energy;
@@ -437,7 +430,7 @@ class Wave {
         if (Math.abs(distance - radiusSum) < this.width * 2) {
             this.collisions.add(other.id);
             other.collisions.add(this.id);
-            if (!this.hasInteracted && this.colorMode === 'colorful') {
+            if (!this.hasInteracted) {
                 this.currentColor = [
                     Math.floor(Math.random() * 256),
                     Math.floor(Math.random() * 256),
@@ -493,10 +486,6 @@ class Wave {
             this.drawQuantumInterferenceWave(ctx);
             return;
         }
-        if (this.waveShape === 'flower') {
-            this.drawFlowerWave(ctx);
-            return;
-        }
         if (this.waveShape === 'spiral') {
             this.drawSpiralWave(ctx);
             return;
@@ -549,9 +538,10 @@ class Wave {
 let waves = [];
 let droplets = [];
 let waveCounter = 0;
+const pendingTimers = new Set();
 
 function addWave(x, y, strength = 1) {
-    const wave = new Wave(x, y, strength);
+    const wave = new Wave(x, y, strength * config.waveStrength);
     wave.id = waveCounter++;
     waves.push(wave);
 }
@@ -561,12 +551,14 @@ function createSplash(x, y) {
     const numWaves = config.dropletCount;
     for (let i = 0; i < numWaves; i++) {
         (function(index) {
-            setTimeout(() => {
+            const timer = setTimeout(() => {
+                pendingTimers.delete(timer);
                 const offset = 5 * config.waveSpread;
                 const rx = x + (Math.random() - 0.5) * offset;
                 const ry = y + (Math.random() - 0.5) * offset;
                 addWave(rx, ry, 0.7 - (index * 0.2));
             }, index * config.dropletDelay);
+            pendingTimers.add(timer);
         })(i);
     }
 }
@@ -620,7 +612,7 @@ document.getElementById('waveSpread')?.addEventListener('input', (e) => {
 });
 
 document.getElementById('gravityIntensity')?.addEventListener('input', (e) => {
-    config.waveSpread = parseFloat(e.target.value);
+    config.gravityIntensity = parseFloat(e.target.value);
     document.getElementById('gravityIntensityValue').textContent = e.target.value;
 });
 
@@ -632,11 +624,6 @@ document.getElementById('dropletDelay')?.addEventListener('input', (e) => {
 document.getElementById('dropletCount')?.addEventListener('input', (e) => {
     config.dropletCount = parseInt(e.target.value);
     document.getElementById('dropletCountValue').textContent = e.target.value;
-});
-
-document.getElementById('dropletVelocity')?.addEventListener('input', (e) => {
-    config.dropletVelocity = parseFloat(e.target.value);
-    document.getElementById('dropletVelocityValue').textContent = e.target.value;
 });
 
 document.getElementById('waveSpeed')?.addEventListener('input', (e) => {
@@ -667,6 +654,8 @@ document.getElementById('waveShape')?.addEventListener('change', (e) => {
 });
 
 document.getElementById('resetButton')?.addEventListener('click', () => {
+    pendingTimers.forEach(clearTimeout);
+    pendingTimers.clear();
     waves = [];
     droplets = [];
     waveCounter = 0;
@@ -728,12 +717,3 @@ function toggleAutoClick() {
 }
 
 document.getElementById('autoClickButton')?.addEventListener('click', toggleAutoClick);
-
-function toggleColorMode() {
-    config.colorMode = config.colorMode === 'monochrome' ? 'colorful' : 'monochrome';
-    const colorModeButton = document.getElementById('colorModeButton');
-    colorModeButton.textContent = `Color Mode: ${config.colorMode}`;
-    colorModeButton.classList.toggle('colorful', config.colorMode === 'colorful');
-}
-
-document.getElementById('colorModeButton')?.addEventListener('click', toggleColorMode);
