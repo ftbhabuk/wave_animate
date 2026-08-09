@@ -6,9 +6,9 @@ const config = {
     waveSpeed: 1,
     waveStrength: 1,
     backgroundFade: 0.4,
-    colorPalette: 'white',
     trailEffect: true,
     gravityIntensity: 1,
+    monochrome: false,
     waveShape: 'circle',
     availableShapes: [
         'circle', 'square', 'triangle', 'mandala', 'spiral', 'fractal',
@@ -35,6 +35,33 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function randomWaveColor() {
+    if (config.monochrome) return [255, 255, 255];
+    return hslToRgb(Math.random(), 0.7 + Math.random() * 0.25, 0.55 + Math.random() * 0.2);
+}
+
 class Droplet {
     constructor(x, y) {
         this.x = x;
@@ -47,18 +74,7 @@ class Droplet {
         this.size = Math.random() * 2 + 1;
         this.alpha = 1;
         this.landed = false;
-        this.color = this.getColor();
-    }
-
-    getColor() {
-        const palettes = {
-            'white': [255, 255, 255],
-            'blue': [100, 149, 237],
-            'green': [50, 205, 50],
-            'purple': [138, 43, 226]
-        };
-        const [r, g, b] = palettes[config.colorPalette];
-        return `rgba(${r}, ${g}, ${b}, `;
+        this.color = [255, 255, 255];
     }
 
     update() {
@@ -82,19 +98,19 @@ class Droplet {
 }
 
 class Wave {
-    constructor(x, y, strength = 1) {
+    constructor(x, y, strength = 1, splashId = null) {
         this.x = x;
         this.y = y;
         this.radius = 0;
         this.strength = strength;
+        this.splashId = splashId;
         this.speed = config.waveSpeed;
         this.energy = 1;
         this.width = 2;
         this.collisions = new Set();
-        this.baseColor = [255, 255, 255];
+        this.baseColor = randomWaveColor();
         this.currentColor = [...this.baseColor];
         this.hasInteracted = false;
-        this.contact = null;
         this.waveShape = config.waveShape; // Store initial shape at creation
     }
 
@@ -425,6 +441,7 @@ class Wave {
 
     interact(other) {
         if (this === other) return;
+        if (this.splashId === other.splashId) return;
         if (this.collisions.has(other.id)) return;
         const distance = this.distanceTo(other);
         const radiusSum = this.radius + other.radius;
@@ -437,26 +454,8 @@ class Wave {
             this.strength *= 0.9;
             other.strength *= 0.9;
 
-            const ratio = radiusSum ? this.radius / radiusSum : 0.5;
-            const cx = this.x + (other.x - this.x) * ratio;
-            const cy = this.y + (other.y - this.y) * ratio;
-            const markScar = (wave) => {
-                wave.contact = {
-                    angle: Math.atan2(cy - wave.y, cx - wave.x),
-                    x: cx,
-                    y: cy,
-                    life: 45
-                };
-            };
-            markScar(this);
-            markScar(other);
-
-            if (!this.hasInteracted) {
-                this.currentColor = [
-                    Math.floor(Math.random() * 256),
-                    Math.floor(Math.random() * 256),
-                    Math.floor(Math.random() * 256)
-                ];
+            if (!this.hasInteracted && !config.monochrome) {
+                this.currentColor = randomWaveColor();
                 this.hasInteracted = true;
             }
         }
@@ -466,10 +465,6 @@ class Wave {
         this.radius += this.speed * this.energy;
         this.energy *= 0.995;
         this.strength *= 0.99;
-        if (this.contact) {
-            this.contact.life--;
-            if (this.contact.life <= 0) this.contact = null;
-        }
         return this.strength > 0.01 && this.energy > 0.01;
     }
 
@@ -520,35 +515,9 @@ class Wave {
             return;
         }
         if (this.waveShape === 'circle') {
-            const scar = this.contact;
-            if (scar) {
-                const seg = 0.42;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, scar.angle + seg, scar.angle + Math.PI * 2 - seg);
-                ctx.stroke();
-
-                const heal = 1 - scar.life / 45;
-                const biteRadius = this.radius * (0.94 + 0.06 * heal);
-                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity * (0.15 + 0.85 * heal)})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, biteRadius, scar.angle - seg, scar.angle + seg);
-                ctx.stroke();
-
-                if (scar.life > 30) {
-                    const flashAlpha = (scar.life - 30) / 15;
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'lighter';
-                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.5 * flashAlpha})`;
-                    ctx.beginPath();
-                    ctx.arc(scar.x, scar.y, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-            } else {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.stroke();
-            }
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.stroke();
         } else if (this.waveShape === 'square') {
             ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
         } else if (this.waveShape === 'triangle') {
@@ -589,16 +558,18 @@ class Wave {
 let waves = [];
 let droplets = [];
 let waveCounter = 0;
+let splashCounter = 0;
 const pendingTimers = new Set();
 
-function addWave(x, y, strength = 1) {
-    const wave = new Wave(x, y, strength * config.waveStrength);
+function addWave(x, y, strength = 1, splashId = null) {
+    const wave = new Wave(x, y, strength * config.waveStrength, splashId);
     wave.id = waveCounter++;
     waves.push(wave);
 }
 
 function createSplash(x, y) {
-    addWave(x, y, 1);
+    const splashId = ++splashCounter;
+    addWave(x, y, 1, splashId);
     const numWaves = config.dropletCount;
     for (let i = 0; i < numWaves; i++) {
         (function(index) {
@@ -607,7 +578,7 @@ function createSplash(x, y) {
                 const offset = 5 * config.waveSpread;
                 const rx = x + (Math.random() - 0.5) * offset;
                 const ry = y + (Math.random() - 0.5) * offset;
-                addWave(rx, ry, 0.7 - (index * 0.2));
+                addWave(rx, ry, 0.7 - (index * 0.2), splashId);
             }, index * config.dropletDelay);
             pendingTimers.add(timer);
         })(i);
@@ -647,6 +618,9 @@ function handleClick(clientX, clientY) {
     const scaleY = canvas.height / rect.height;
     const x = (clientX - rect.left) * scaleX;
     const y = (clientY - rect.top) * scaleY;
+    if (config.useRandomShapes) {
+        config.waveShape = getRandomShape();
+    }
     createSplash(x, y);
 }
 
@@ -692,8 +666,8 @@ document.getElementById('backgroundFade')?.addEventListener('input', (e) => {
     document.getElementById('backgroundFadeValue').textContent = e.target.value;
 });
 
-document.getElementById('colorPalette')?.addEventListener('change', (e) => {
-    config.colorPalette = e.target.value;
+document.getElementById('monochromeToggle')?.addEventListener('change', (e) => {
+    config.monochrome = e.target.checked;
 });
 
 document.getElementById('trailEffect')?.addEventListener('change', (e) => {
@@ -705,11 +679,25 @@ document.getElementById('waveShape')?.addEventListener('change', (e) => {
 });
 
 document.getElementById('resetButton')?.addEventListener('click', () => {
+    stopAutoVisualizer();
     pendingTimers.forEach(clearTimeout);
     pendingTimers.clear();
     waves = [];
     droplets = [];
     waveCounter = 0;
+});
+
+document.addEventListener('keydown', (e) => {
+    const tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (e.key === 's' || e.key === 'S') {
+        const select = document.getElementById('waveShape');
+        if (!select) return;
+        const options = [...select.options].map(opt => opt.value);
+        const next = options[(options.indexOf(config.waveShape) + 1) % options.length];
+        config.waveShape = next;
+        select.value = next;
+    }
 });
 
 document.querySelectorAll('.section-header')?.forEach(header => {
@@ -726,7 +714,19 @@ document.querySelectorAll('.section-header')?.forEach(header => {
 
 animate();
 
-let autoClickInterval = null;
+let autoVisualizerRunning = false;
+let autoVisualizerTimeout = null;
+let autoCycleCount = 0;
+
+const SLIDERS = [
+    { id: 'waveSpread', key: 'waveSpread' },
+    { id: 'dropletCount', key: 'dropletCount' },
+    { id: 'dropletDelay', key: 'dropletDelay' },
+    { id: 'waveSpeed', key: 'waveSpeed' },
+    { id: 'waveStrength', key: 'waveStrength' },
+    { id: 'backgroundFade', key: 'backgroundFade' },
+    { id: 'gravityIntensity', key: 'gravityIntensity' }
+];
 
 function getRandomPosition() {
     return {
@@ -744,27 +744,76 @@ function getRandomShape() {
     return config.availableShapes[randomIndex];
 }
 
-function toggleAutoClick() {
-    const autoClickButton = document.getElementById('autoClickButton');
-    if (autoClickInterval) {
-        clearInterval(autoClickInterval);
-        autoClickInterval = null;
-        autoClickButton.textContent = 'Start Auto-Click';
-        autoClickButton.classList.remove('active');
-    } else {
-        autoClickInterval = setInterval(() => {
-            const { x, y } = getRandomPosition();
-            if (config.useRandomShapes) {
-                const previousShape = config.waveShape;
-                config.waveShape = getRandomShape();
-                handleClick(x, y);
-            } else {
-                handleClick(x, y);
-            }
-        }, 700);
-        autoClickButton.textContent = 'Stop Auto-Click';
-        autoClickButton.classList.add('active');
+function randomizeParams() {
+    const count = 1 + Math.floor(Math.random() * 3);
+    const shuffled = SLIDERS.slice().sort(() => Math.random() - 0.5);
+    for (let i = 0; i < count && i < shuffled.length; i++) {
+        const spec = shuffled[i];
+        const input = document.getElementById(spec.id);
+        if (!input) continue;
+        const min = parseFloat(input.min);
+        const max = parseFloat(input.max);
+        const step = parseFloat(input.step || 1);
+        const steps = Math.floor((max - min) / step);
+        const value = min + Math.floor(Math.random() * (steps + 1)) * step;
+        config[spec.key] = value;
+        input.value = value;
+        const span = document.getElementById(spec.id + 'Value');
+        if (span) span.textContent = value;
     }
 }
 
-document.getElementById('autoClickButton')?.addEventListener('click', toggleAutoClick);
+function themeShift() {
+    if (config.useRandomShapes) {
+        config.waveShape = getRandomShape();
+        const select = document.getElementById('waveShape');
+        if (select) select.value = config.waveShape;
+    }
+    if (Math.random() < 0.5) {
+        config.trailEffect = !config.trailEffect;
+        const trail = document.getElementById('trailEffect');
+        if (trail) trail.checked = config.trailEffect;
+    }
+    if (Math.random() < 0.5) {
+        config.monochrome = !config.monochrome;
+        const mono = document.getElementById('monochromeToggle');
+        if (mono) mono.checked = config.monochrome;
+    }
+}
+
+function autoVisualizerStep() {
+    autoCycleCount++;
+    if (autoCycleCount % 7 === 0) {
+        themeShift();
+    } else {
+        randomizeParams();
+    }
+    const { x, y } = getRandomPosition();
+    handleClick(x, y);
+    autoVisualizerTimeout = setTimeout(autoVisualizerStep, 800 + Math.random() * 700);
+}
+
+function stopAutoVisualizer() {
+    autoVisualizerRunning = false;
+    if (autoVisualizerTimeout) {
+        clearTimeout(autoVisualizerTimeout);
+        autoVisualizerTimeout = null;
+    }
+    const button = document.getElementById('autoClickButton');
+    button.textContent = 'Start Auto Visualizer';
+    button.classList.remove('active');
+}
+
+function toggleAutoVisualizer() {
+    if (autoVisualizerRunning) {
+        stopAutoVisualizer();
+        return;
+    }
+    autoVisualizerRunning = true;
+    const button = document.getElementById('autoClickButton');
+    button.textContent = 'Stop Auto Visualizer';
+    button.classList.add('active');
+    autoVisualizerStep();
+}
+
+document.getElementById('autoClickButton')?.addEventListener('click', toggleAutoVisualizer);

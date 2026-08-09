@@ -1,96 +1,63 @@
-# 🌊 Wave Simulation
+# 🌊 Wave Canvas
 
-An interactive, real-time wave simulation with stunning visual effects and customizable physics. Create mesmerizing patterns by clicking anywhere on the canvas and watch as waves propagate, interact, and transform.
+An interactive, real-time wave playground. Click anywhere on the canvas and watch ripples spread, collide, and paint themselves across the screen — or let **Auto Visualizer** run the show.
 
-![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=flat&logo=javascript&logoColor=%23F7DF1E) ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=flat&logo=html5&logoColor=white)
-
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=flat&logo=javascript&logoColor=%23F7DF1E)
+![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=flat&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/css3-%23157BF6.svg?style=flat&logo=css3&logoColor=white)
 
-## ✨ Features
+[Try it live](https://ftbhabuk.github.io/wave_animate/)
 
-### Wave Shapes
-Choose from a diverse collection of wave patterns:
-- **Basic Shapes**: Circle, Square, Triangle
-- **Organic Patterns**: Mandala, Spiral, Fractal
-- **Advanced Forms**: Cosmic Mandala, Fractal Dendrite, Quantum Interference
-- **Exotic Waves**: Ethereal Plasma, Quantum Singularity, Fractal Consciousness, Fireworks
+![Wave Canvas preview](preview.gif)
 
-### Interactive Controls
-- **Wave Spread**: Control how waves disperse from the impact point
-- **Wave Count**: Generate multiple concurrent waves (1-5)
-- **Wave Velocity**: Adjust the initial speed of wave propagation
-- **Wave Delay**: Set timing between multiple wave emissions
-- **Wave Speed**: Control expansion rate
-- **Wave Strength**: Adjust intensity and opacity
+## Features
 
-### Visual Effects
-- **Color Palettes**: White, Blue, Green, Purple
-- **Color Modes**: Switch between monochrome and colorful modes
-- **Trail Effects**: Enable ghosting effects for ethereal visuals
-- **Background Fade**: Adjust persistence of wave trails
-- **Wave Interactions**: Waves change color when they collide
+- **13 wave shapes** — from plain circles to cosmic mandalas, quantum interference, fractal dendrites, and fireworks
+- **Every wave spawns with a random vibrant color** — or switch to monochrome for a clean white look
+- **Collision physics** — incoming rings slow and dim when they meet waves from a different origin
+- **Trail / ghosting effect** with adjustable persistence
+- **Auto Visualizer** — randomness on autopilot: it clicks, cycles shapes, drifts all settings, and even animates the sidebar sliders as it goes
+- **Zero dependencies** — pure vanilla JS + Canvas; no build step
 
-### Automation
-- **Auto-Click Mode**: Automatically generate waves at random positions
-- **Random Shapes**: Enable random shape selection for each wave
-- **Collision Detection**: Waves interact and transform on contact
-
-## 🚀 Getting Started
-
-### Installation
-
-```bash
-git clone https://github.com/yourusername/wave-simulation.git
-cd wave-simulation
-```
-
-Open `index.html` in your browser - no build process or dependencies required!
-
-### Usage
-
-1. **Create Waves**: Click anywhere on the canvas to generate waves
-2. **Adjust Settings**: Use the sidebar controls to customize behavior
-3. **Experiment**: Try different shapes and watch them interact
-4. **Auto Mode**: Enable auto-click for continuous generation
-5. **Reset**: Clear all waves with the reset button
-
-## 🎮 Controls
+## Controls
 
 | Control | Description | Range |
 |---------|-------------|-------|
-| Wave Spread | Controls dispersion radius | 0.0 - 10.0 |
-| Number of Waves | Multiple waves per click | 1 - 5 |
-| Wave Velocity | Initial propagation speed | 5 - 25 |
-| Wave Delay | Time between waves (ms) | 0 - 500 |
-| Wave Speed | Expansion rate | 1 - 5 |
-| Wave Strength | Intensity/opacity | 1 - 1.5 |
-| Background Fade | Trail persistence | 0.1 - 0.5 |
+| Wave Spread | Dispersion radius of multi-wave splashes | 0.0 – 10.0 |
+| Number of Waves | Waves emitted per splash | 1 – 5 |
+| Wave Delay | Stagger between emitted waves | 0 – 500 ms |
+| Wave Speed | Ring expansion rate | 1 – 2 |
+| Wave Strength | Intensity & lifetime | 0.1 – 2.0 |
+| Background Fade | Trail persistence | 0.1 – 0.5 |
+| Gravity Intensity | Droplet arc gravity | 0.5 – 1.5 |
+| Trail Effect | Ghosting on/off | toggle |
+| Monochrome | All-white waves | toggle |
+| Random Shapes | Random shape per manual click | toggle |
+| Auto Visualizer | Fully automated sessions | toggle |
 
-## 🎨 Wave Shape Gallery
+## Keyboard
 
-### Cosmic Mandala
-Rotating petal formations with multiple layers creating intricate mandala patterns
+| Key | Action |
+| --- | --- |
+| `S` | Cycle to the next wave shape |
 
-### Fractal Dendrite
-Recursive branching structures resembling neural networks or tree growth
+## Getting Started
 
-### Quantum Interference
-Wave patterns with phase shifts creating constructive and destructive interference
+```bash
+git clone https://github.com/ftbhabuk/wave_animate.git
+cd wave_animate
+```
 
-### Ethereal Plasma
-Flowing, organic waves with dynamic radius modulation
+Open `index.html` in any browser — nothing to install or build.
 
-### Quantum Singularity
-Spiral formations with gravitational distortion effects
+## Wave Shape Gallery
 
-### Fractal Consciousness
-Golden ratio-based recursive branches with organic curves
+- **Basic** — Circle, Square, Triangle
+- **Organic** — Mandala, Spiral, Fractal
+- **Exotic** — Cosmic Mandala, Fractal Dendrite, Quantum Interference, Ethereal Plasma, Quantum Singularity, Fractal Consciousness, Fireworks
 
-## 🛠️ Built With
+## Built With
 
-- **JavaScript** - Pure vanilla JS, no frameworks
-- **HTML5 Canvas** - Hardware-accelerated rendering
-- **CSS3** - Modern styling
-
----
-
+- **Vanilla JavaScript** — no frameworks
+- **HTML5 Canvas** — hardware-accelerated rendering
+- **CSS3** — dark sidebar UI
