@@ -94,6 +94,7 @@ class Wave {
         this.baseColor = [255, 255, 255];
         this.currentColor = [...this.baseColor];
         this.hasInteracted = false;
+        this.contact = null;
         this.waveShape = config.waveShape; // Store initial shape at creation
     }
 
@@ -430,6 +431,26 @@ class Wave {
         if (Math.abs(distance - radiusSum) < this.width * 2) {
             this.collisions.add(other.id);
             other.collisions.add(this.id);
+
+            this.energy *= 0.8;
+            other.energy *= 0.8;
+            this.strength *= 0.9;
+            other.strength *= 0.9;
+
+            const ratio = radiusSum ? this.radius / radiusSum : 0.5;
+            const cx = this.x + (other.x - this.x) * ratio;
+            const cy = this.y + (other.y - this.y) * ratio;
+            const markScar = (wave) => {
+                wave.contact = {
+                    angle: Math.atan2(cy - wave.y, cx - wave.x),
+                    x: cx,
+                    y: cy,
+                    life: 45
+                };
+            };
+            markScar(this);
+            markScar(other);
+
             if (!this.hasInteracted) {
                 this.currentColor = [
                     Math.floor(Math.random() * 256),
@@ -445,6 +466,10 @@ class Wave {
         this.radius += this.speed * this.energy;
         this.energy *= 0.995;
         this.strength *= 0.99;
+        if (this.contact) {
+            this.contact.life--;
+            if (this.contact.life <= 0) this.contact = null;
+        }
         return this.strength > 0.01 && this.energy > 0.01;
     }
 
@@ -495,9 +520,35 @@ class Wave {
             return;
         }
         if (this.waveShape === 'circle') {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.stroke();
+            const scar = this.contact;
+            if (scar) {
+                const seg = 0.42;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, scar.angle + seg, scar.angle + Math.PI * 2 - seg);
+                ctx.stroke();
+
+                const heal = 1 - scar.life / 45;
+                const biteRadius = this.radius * (0.94 + 0.06 * heal);
+                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${intensity * (0.15 + 0.85 * heal)})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, biteRadius, scar.angle - seg, scar.angle + seg);
+                ctx.stroke();
+
+                if (scar.life > 30) {
+                    const flashAlpha = (scar.life - 30) / 15;
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'lighter';
+                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.5 * flashAlpha})`;
+                    ctx.beginPath();
+                    ctx.arc(scar.x, scar.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            } else {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
         } else if (this.waveShape === 'square') {
             ctx.strokeRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
         } else if (this.waveShape === 'triangle') {
